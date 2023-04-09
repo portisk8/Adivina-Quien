@@ -27,7 +27,12 @@ namespace Feature.Api.Hub
                 player.Code = Guid.NewGuid().ToString();
             }
             await Groups.AddToGroupAsync(Context.ConnectionId, player.Code);
-            await SendMessageToClient(Context.ConnectionId, JsonSerializer.Serialize(player, serializeOptions));
+            var message = new Message()
+            {
+                Player = player,
+                Text = $"{player.Name} a ingresado a la sala."
+            };
+            await SendMessage(message);
             return JsonSerializer.Serialize(player, serializeOptions);
         }
         public async Task SendMessage(Message message)

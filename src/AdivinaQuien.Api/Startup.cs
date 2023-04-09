@@ -41,7 +41,7 @@ namespace AdivinaQuien.Api
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builders =>
             {
-                builders.WithOrigins(allowedOrigins.ToArray())
+                builders.WithOrigins(allowedOrigins)
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();

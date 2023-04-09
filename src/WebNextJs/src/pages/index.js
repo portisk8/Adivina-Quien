@@ -1,9 +1,9 @@
 "use client";
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import { useSignalR } from "@/components/SignalR/useSignalR";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { SignalRContext } from "@/components/SignalR/SignalRContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,15 +12,17 @@ export default function Home() {
   const [code, setCode] = useState("");
 
   const router = useRouter();
+  const connection = useContext(SignalRContext);
 
-  const signalR = useSignalR();
-  useEffect(() => {
-    signalR.connect({});
-  }, []);
+  useEffect(() => {}, []);
 
   const handleStart = async () => {
     console.log(name);
-    const responseStart = await signalR.start({ name, id: null, code: code });
+    const responseStart = await connection.invoke("addToGroup", {
+      name,
+      id: null,
+      code: code,
+    });
     if (responseStart) {
       console.log("handleStart > ", responseStart);
       let player = JSON.parse(responseStart);

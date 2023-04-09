@@ -1,22 +1,23 @@
 "use client";
-import { useSignalR } from "@/components/SignalR/useSignalR";
+import { SignalRContext } from "@/components/SignalR/SignalRContext";
 import {
   getCategoriesServiceAsync,
   getCharactersServiceAsync,
 } from "@/services/adivinaQuienService";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 function Game() {
   const [categoryList, setCategoryList] = useState([]);
   const [categoryId, setCategoryId] = useState();
   const [characterList, setCharacterList] = useState([]);
   const [characterSelectedId, setCharacterSelectedId] = useState();
-  const [chatList, setChatList] = useState([]);
   const [inputChat, setInputChat] = useState();
+  const chatList = useSelector((state) => state.hub.chat);
 
   const router = useRouter();
-  const signalR = useSignalR();
+  const connection = useContext(SignalRContext);
   const { id } = router.query;
 
   const getCategories = async () => {
@@ -34,19 +35,11 @@ function Game() {
 
   const init = async () => {
     getCategories();
-    await signalR.connect({ onReceiveMessage: handleChatList });
-    // await signalR.start(JSON.parse(localStorage.getItem("player")));
   };
 
   useEffect(() => {
     init();
   }, []);
-
-  const handleChatList = async (message) => {
-    console.log("handleChatList > ", message);
-    chatList.push(message);
-    setChatList([...chatList]);
-  };
 
   const handleSetCategory = async (item) => {
     setCategoryId(item.categoryId);
@@ -99,7 +92,7 @@ function Game() {
           <button
             className="p-2"
             onClick={async () => {
-              await signalR.send("SendMessage", {
+              await connection.invoke("SendMessage", {
                 player: JSON.parse(localStorage.getItem("player")),
                 text: inputChat,
               });
@@ -111,7 +104,9 @@ function Game() {
 
         <div>
           {chatList.map((chat, ix) => (
-            <div>Mensaje: {JSON.stringify(chat)}</div>
+            <div>
+              {chat.player.name} dice: {chat.text}
+            </div>
           ))}
         </div>
       </div>
